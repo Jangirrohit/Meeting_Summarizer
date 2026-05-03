@@ -1,0 +1,5 @@
+.env
+credentials.json
+__pycache__
+temp_audio.mp3
+token.json
