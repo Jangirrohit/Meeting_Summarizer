@@ -25,10 +25,16 @@ load_dotenv()
 class ActionItem(BaseModel):
     title: str = Field(description="title of the task")
     task: str = Field(description="a detailed task description")
-    assignee: Optional[str] = Field(default=None, description="Specific person responsible for the task; avoid vague terms like 'team' unless explicitly stated")
-    deadline: Optional[str] = Field(default=None, description="Deadline or time reference for the task or event time etc., if any")
+    assignee: Optional[str] = Field(
+        default=None, 
+        description="""Specific person responsible for the task; 
+                    avoid vague terms like 'team' unless explicitly stated""")
+    deadline: Optional[str] = Field(
+        default=None, 
+        description="Deadline or time reference for the task or event time etc., if any")
     type: str = Field(description="Type of action: email | meeting | reminder | general")
-    priority: Literal["low", "medium", "high"] = Field(default="medium", description="Priority level of the task")
+    priority: Literal["low", "medium", "high"] = Field(
+        default="medium", description="Priority level of the task")
 
 class ExtractedData(BaseModel):
     summary: str = Field(
@@ -40,33 +46,28 @@ class ExtractedData(BaseModel):
         "Keep it concise, factual, and avoid adding information not present in the meeting."
         )
     )
-
-    participants: List[str] = Field(
-        description=(
-        "List of participant names exactly as mentioned in the meeting. "
-        "Use full names if available. Avoid abbreviations unless explicitly used."
-        )
-    )
-    
     action_items: List[ActionItem] = Field(
         default_factory=list,
-        description = "Extract concise action items. Merge tasks per person. No vague or duplicate items. Return [] if none."    
+        description = """Extract concise action items. Merge tasks per person. 
+        No vague or duplicate items. Return [] if none."""   
         )
-    
 
 # Graph State for the Workflow
 class GraphState(dict):
-    transcript: Optional[str]
-    audio_file: Optional[str]
-    transcript_format: str
-    summary: Optional[str]
-    action_items: Optional[List[dict]]
+    transcript: Optional[str] # The transcript of the meeting audio
+    audio_file: Optional[str] # The path to the uploaded audio file (if any)
+    transcript_format: str # Format of the transcript input, either "audio" or "text"
+    summary: Optional[str] # The generated summary of the meeting
+    action_items: Optional[List[dict]] # The list of action items extracted from the meeting 
     
-    messages: Annotated[list[BaseMessage], add_messages]
-    final_summary: str
-    feedback: Optional[Annotated[List[str], operator.add]]
-    approved: Optional[bool]
-    retry_count: int 
+    messages: Annotated[list[BaseMessage], add_messages] 
+    # The conversation history for the tool-enabled LLM, stored as a list of BaseMessage objects. 
+    final_summary: str 
+    # The final summary generated after processing the action items and executing the necessary tools.
+    feedback: Optional[Annotated[List[str], operator.add]] 
+    # Feedback provided by the user during the HITL review process, stored as a list of strings.  
+    approved: Optional[bool] 
+    # The approval status of the action items after the HITL review process, stored as a boolean value.
 
 
 ## LLMs setup
@@ -111,7 +112,6 @@ def extract_node(state: GraphState):
     re= {
         "summary": result.summary,
         "action_items": action_items,
-        "retry_count":0
     }
     return re
 

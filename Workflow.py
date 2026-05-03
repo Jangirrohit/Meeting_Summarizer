@@ -23,8 +23,6 @@ def Human_review_node(state: GraphState):
 def review_router(state: GraphState):
     if state.get("approved"):
         return "get_email_and_init_messages"
-    if state.get("retry_count", 0) >=2:
-        return "get_email_and_init_messages"
     else:
         return "re_extract"
     
@@ -52,7 +50,6 @@ def re_extract_node(state: GraphState):
     re= {
         "summary": result.summary,
         "action_items": action_items,
-        "retry_count": state.get("retry_count", 0) + 1
     }
     return re
     
