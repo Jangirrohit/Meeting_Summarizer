@@ -20,7 +20,7 @@ mode = st.radio("Select Input Type", ["Audio", "Text"])
 input_data = {}
 
 if mode == "Audio":
-    audio_file = st.file_uploader("Upload audio file", type=["mp3", "wav", "m4a"], )
+    audio_file = st.file_uploader("Upload audio file", type=None)
     if audio_file:
         with open("temp_audio.mp3", "wb") as f:
             f.write(audio_file.read())
@@ -57,7 +57,17 @@ if st.session_state.waiting_for_review and st.session_state.result:
 
     st.subheader("Action Items")
     for i, action in enumerate(interrupt_data["action_items"], start=1):
-        st.write(f"{i}. {action}")
+        st.markdown(f"### {i}. {action.get('title', 'No Title')}")
+        
+        st.markdown(f"- **Task:** {action.get('task', '')}")
+        st.markdown(f"- **Assignee:** {action.get('assignee', '')}")
+        st.markdown(f"- **Priority:** {action.get('priority', '')}")
+        st.markdown(f"- **Type:** {action.get('type', '')}")
+        
+        if action.get("deadline"):
+            st.markdown(f"- **Deadline:** {action.get('deadline')}")
+        
+        st.markdown("---")
 
     decision = st.radio("Approve these actions?", ["Yes", "No"])
 
@@ -77,14 +87,20 @@ if st.session_state.waiting_for_review and st.session_state.result:
         )
 
         st.session_state.result = result
-        st.session_state.waiting_for_review = False
+        st.session_state.waiting_for_review = "__interrupt__" in result
 
 # Final output
 if st.session_state.result and not st.session_state.waiting_for_review:
     result = st.session_state.result
 
+    st.subheader("🎯 Final Output")
+
     if isinstance(result, dict):
-        st.subheader("🎯 Final Output")
-        st.json(result)
+        for key, value in result.items():
+            with st.expander(f"{key}", expanded=False):
+                if isinstance(value, (dict, list)):
+                    st.json(value)
+                else:
+                    st.write(value)
     else:
         st.write(result)

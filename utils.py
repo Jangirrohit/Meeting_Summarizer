@@ -72,18 +72,14 @@ class GraphState(dict):
 ## LLMs setup
 load_dotenv()
 llm_plain = ChatGroq(
-    model="qwen/qwen3-32b",
+    # model="qwen/qwen3-32b",
+    model="openai/gpt-oss-120b"
 )
-
-
 ## LLM for structured output (Meeting summary, action items, participants etc).
 structured_llm = llm_plain.with_structured_output(ExtractedData)
 # Tool-enabled LLM 
 llm_with_tools = llm_plain.bind_tools(tools)
 
-# str LLM for re_extract
-llm= ChatGroq(model= "openai/gpt-oss-120b")
-re_extract_llm = llm.with_structured_output(ExtractedData)
 
 # transcription function using Groq's audio transcription API. It takes the audio file from the state, sends it to the API, and returns the transcript in the state.  
 def transcribe(state):

@@ -5,7 +5,7 @@ import sqlite3
 from langgraph.prebuilt import tools_condition
 from langgraph.types import interrupt, Command
  
-from utils import GraphState, transcribe, extract_node, final_node, tool_agent_node, tool_node, structured_llm, get_assignee_email_and_initialize_messages, re_extract_llm
+from utils import GraphState, transcribe, extract_node, final_node, tool_agent_node, tool_node, structured_llm, get_assignee_email_and_initialize_messages
 
 
 def Human_review_node(state: GraphState):
@@ -47,7 +47,7 @@ def re_extract_node(state: GraphState):
         - Max 5 action items
     """
 
-    result= re_extract_llm.invoke(prompt)
+    result= structured_llm.invoke(prompt)
     action_items= [item.model_dump() for item in result.action_items]
     re= {
         "summary": result.summary,
